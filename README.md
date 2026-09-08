@@ -26,16 +26,16 @@ Indicators are reported **separately for women and men** (not averaged), for ana
 
 - Reduced the original 136-column source file down to the 6 indicator columns needed, plus State/UT and Area identifiers
 - **Fixed a data quality bug:** the source file uses brackets like `(x.x)` to flag low-reliability, small-sample figures — during file conversion these were misread as negative numbers. All affected values were corrected (converted to positive) and flagged in a `Data_Quality_Flag` column
-- This bug was initially fixed only for the Blood Sugar and Blood Pressure columns; a second pass — triggered by an unusual result in Python's `df.describe()` — caught the same issue in the Overweight columns for two more state/area rows. All affected files were rebuilt and the fix is documented in the data quality log inside `CLEAN_DATA.xlsx`
+- This bug was initially fixed only for the Blood Sugar and Blood Pressure columns; a second pass — triggered by an unusual result in Python's `df.describe()` — caught the same issue in the Overweight columns for two more state/area rows. All affected files were rebuilt and the fix is documented in the data quality log
 - Suppressed values (marked `*` in the source, meaning fewer than 25 survey cases) were left as true missing values — never guessed or filled with zero
 
-Full details: see the `DATA_QUALITY_CHECK` sheet inside `CLEAN_DATA.xlsx`.
+Full details: see the `DATA_QUALITY_CHECK` sheet inside [`data/CLEAN_DATA.xlsx`](data/CLEAN_DATA.xlsx).
 
 ## Analysis Workflow
 
-1. **Excel** — cleaning, data dictionary, exploratory analysis (national averages, highest/lowest states, spread) — see `EXCEL_ANALYSIS.xlsx`
-2. **SQL** (via Google Colab / SQLite) — structured queries: rankings, above-average filtering, urban/rural comparison, categorization — see `analysis.sql`
-3. **Python** (pandas, matplotlib, via Google Colab) — data validation and 3 charts with written explanations — see `01_nfhs5_health_awareness_analysis.ipynb`
+1. **Excel** — cleaning, data dictionary, exploratory analysis (national averages, highest/lowest states, spread) — see [`docs/EXCEL_ANALYSIS.xlsx`](docs/EXCEL_ANALYSIS.xlsx)
+2. **SQL** (via Google Colab / SQLite) — structured queries: rankings, above-average filtering, urban/rural comparison, categorization — see [`SQL/analysis.sql`](SQL/analysis.sql)
+3. **Python** (pandas, matplotlib, via Google Colab) — data validation and 3 charts with written explanations — see [`python/01_nfhs5_health_awareness_analysis.ipynb`](python/01_nfhs5_health_awareness_analysis.ipynb)
 4. **Power BI** — 5-page interactive dashboard (see below)
 
 ## Lifestyle Disease Indicator Score (LDIS)
@@ -46,18 +46,36 @@ A custom index created for this project only — **it is not a medical score or 
 - **Sensitivity check:** a standardized (z-score) version was also calculated, to check whether the ranking holds up under a different scoring method
 - **Result:** Kerala ranks #1 (highest LDIS) for both women and men, under both scoring methods — a stable, defensible finding
 
-Full methodology: see `LDIS_ANALYSIS.xlsx` and the dashboard's Methodology page.
+Full methodology: see [`docs/LDIS_ANALYSIS.xlsx`](docs/LDIS_ANALYSIS.xlsx) and the dashboard's Methodology page below.
 
 ## Dashboard
 
-Built in Power BI Desktop. Since Power BI Service (online publishing) requires a work/school email account, this dashboard is shared via screenshots rather than a live link — see `07_Dashboard_Images` (or the images below, once added to this README).
+Built in Power BI Desktop. Since Power BI Service (online publishing) requires a work/school email account, this dashboard is shared via screenshots below rather than a live link.
 
-**5 pages:**
-1. **Start Here** — project intro, purpose, and disclaimer
-2. **Explore India** — state-by-state comparison charts
-3. **Explore a State** — interactive dropdown to view any state's indicator values
-4. **Understand the Indicators** — plain-language explanations of each health measure
-5. **Methodology** — data source, LDIS explanation, and limitations
+### 1. Start Here
+Project intro, purpose, and disclaimer.
+
+![Start Here page](dashboard/01_start_here.png)
+
+### 2. Explore India
+State-by-state comparison charts for blood pressure and overweight/obesity.
+
+![Explore India page](dashboard/02_explore_india.png)
+
+### 3. Explore a State
+Interactive dropdown to view any state's indicator values.
+
+![Explore a State page](dashboard/03_explore_a_state.png)
+
+### 4. Understand the Indicators
+Plain-language explanations of each health measure.
+
+![Understand the Indicators page](dashboard/04_understand_indicators.png)
+
+### 5. Methodology
+Data source, LDIS explanation, and limitations.
+
+![Methodology page](dashboard/05_methodology.png)
 
 ## Key Findings
 
@@ -81,10 +99,33 @@ Excel, Google Colab (SQL + Python), Power BI Desktop, GitHub
 ## How to Reproduce
 
 1. Download the source file from the [data.gov.in link above](https://data.gov.in/resource/all-india-and-stateut-wise-factsheets-national-family-health-survey-nfhs-5-2019-2021)
-2. Follow the cleaning steps documented in `CLEAN_DATA.xlsx` (Data_Quality_Check sheet)
-3. Run the queries in `analysis.sql` against the cleaned CSV
-4. Run `01_nfhs5_health_awareness_analysis.ipynb` in Google Colab
-5. Open the Power BI file (not included in this repo due to file size — screenshots provided instead) to explore the dashboard
+2. Follow the cleaning steps documented in [`data/CLEAN_DATA.xlsx`](data/CLEAN_DATA.xlsx) (Data_Quality_Check sheet)
+3. Run the queries in [`SQL/analysis.sql`](SQL/analysis.sql) against the cleaned CSV
+4. Run [`python/01_nfhs5_health_awareness_analysis.ipynb`](python/01_nfhs5_health_awareness_analysis.ipynb) in Google Colab
+5. Open Power BI Desktop to explore/rebuild the dashboard (see screenshots above)
+
+## Repository Structure
+
+```
+india-health-awareness-explorer/
+├── README.md
+├── data/
+│   └── CLEAN_DATA.xlsx
+├── docs/
+│   ├── DATA_DICTIONARY.xlsx
+│   ├── EXCEL_ANALYSIS.xlsx
+│   └── LDIS_ANALYSIS.xlsx
+├── SQL/
+│   └── analysis.sql
+├── python/
+│   └── 01_nfhs5_health_awareness_analysis.ipynb
+└── dashboard/
+    ├── 01_start_here.png
+    ├── 02_explore_india.png
+    ├── 03_explore_a_state.png
+    ├── 04_understand_indicators.png
+    └── 05_methodology.png
+```
 
 ---
 
