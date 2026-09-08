@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>India Health Awareness Explorer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root{
+    --ink:#1a2332;
+    --paper:#faf7f0;
+    --panel:#ffffff;
+    --line:#e2ddd0;
+    --blue:#2b4c6f;
+    --blue-soft:#7ea3c2;
+    --amber:#c8801a;
+    --amber-soft:#e8c07a;
+    --muted:#6b6558;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+    line-height:1.5;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:0 24px 80px;}
+
+  header{
+    border-bottom:3px solid var(--ink);
+    padding:48px 0 28px;
+    margin-bottom:36px;
+  }
+  .kicker{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    font-size:13px;
+    letter-spacing:0.04em;
+    color:var(--amber);
+    font-weight:600;
+    margin-bottom:10px;
+  }
+  h1{
+    font-size:42px;
+    margin:0 0 14px;
+    font-weight:700;
+    letter-spacing:-0.01em;
+    max-width:14ch;
+  }
+  .dek{
+    font-size:18px;
+    color:var(--muted);
+    max-width:62ch;
+    margin:0;
+  }
+  .source-line{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    font-size:13px;
+    color:var(--muted);
+    margin-top:18px;
+  }
+
+  section{margin-bottom:56px;}
+  h2{
+    font-size:24px;
+    margin:0 0 6px;
+    font-weight:700;
+  }
+  .section-note{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    font-size:14px;
+    color:var(--muted);
+    margin:0 0 22px;
+    max-width:70ch;
+  }
+
+  /* State explorer */
+  .explorer{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:2px;
+    padding:28px;
+  }
+  .explorer-top{
+    display:flex;
+    align-items:baseline;
+    gap:16px;
+    flex-wrap:wrap;
+    margin-bottom:22px;
+  }
+  .explorer-top label{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    font-size:13px;
+    color:var(--muted);
+    text-transform:none;
+  }
+  select{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    font-size:17px;
+    font-weight:600;
+    padding:8px 14px;
+    border:2px solid var(--ink);
+    border-radius:2px;
+    background:var(--panel);
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .cards{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+  }
+  .card{
+    background:var(--panel);
+    padding:20px 18px;
+  }
+  .card-label{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    font-size:12px;
+    color:var(--muted);
+    margin-bottom:10px;
+  }
+  .card-values{display:flex;gap:22px;}
+  .card-val-group{flex:1;}
+  .card-val-group .who{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    font-size:11px;
+    color:var(--muted);
+    margin-bottom:2px;
+  }
+  .card-val{
+    font-size:30px;
+    font-weight:700;
+    font-variant-numeric:tabular-nums;
+  }
+  .card-val.women{color:var(--amber);}
+  .card-val.men{color:var(--blue);}
+  .pct{font-size:16px;font-weight:400;color:var(--muted);}
+
+  .legend-row{
+    display:flex;gap:22px;margin-top:16px;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    font-size:13px;color:var(--muted);
+  }
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;}
+  .dot.women{background:var(--amber);}
+  .dot.men{background:var(--blue);}
+
+  /* Compare panel */
+  .compare-controls{
+    display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;
+  }
+  .toggle-btn{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    font-size:13px;
+    padding:8px 16px;
+    border:1.5px solid var(--ink);
+    background:var(--panel);
+    color:var(--ink);
+    border-radius:20px;
+    cursor:pointer;
+  }
+  .toggle-btn.active{
+    background:var(--ink);
+    color:var(--paper);
+  }
+  .chart-box{
+    background:var(--panel);
+    border:1px solid var(--line);
+    padding:20px 24px 8px;
+  }
+  canvas{max-width:100%;}
+
+  footer{
+    border-top:1px solid var(--line);
+    padding-top:24px;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    font-size:13px;
+    color:var(--muted);
+    max-width:70ch;
+  }
+  footer strong{color:var(--ink);}
+  a{color:var(--blue);}
+
+  @media (max-width:640px){
+    h1{font-size:32px;}
+    .cards{grid-template-columns:1fr;}
+    .card-values{gap:14px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">NFHS-5 &middot; 2019&ndash;2021 &middot; State/UT Data</div>
+    <h1>India Health Awareness Explorer</h1>
+    <p class="dek">How high blood sugar, elevated blood pressure, and overweight/obesity are reported across India's states &mdash; and how women's and men's figures compare, state by state.</p>
+    <div class="source-line">Source: National Family Health Survey (NFHS-5), Government of India Open Government Data Platform. This is an awareness tool, not a medical diagnostic tool &mdash; it describes population-level patterns only.</div>
+  </header>
+
+  <section>
+    <h2>Look up a state</h2>
+    <p class="section-note">Pick any state or union territory to see its reported figures for each indicator, split by sex.</p>
+    <div class="explorer">
+      <div class="explorer-top">
+        <label for="stateSelect">State / UT</label>
+        <select id="stateSelect"></select>
+      </div>
+      <div class="cards" id="cards"></div>
+      <div class="legend-row">
+        <span><span class="dot women"></span>Women</span>
+        <span><span class="dot men"></span>Men</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Compare all states</h2>
+    <p class="section-note">Choose an indicator to rank every state highest to lowest. The state you picked above is highlighted.</p>
+    <div class="compare-controls" id="indicatorToggles"></div>
+    <div class="chart-box">
+      <canvas id="rankChart" height="520"></canvas>
+    </div>
+  </section>
+
+  <footer>
+    <strong>About this data.</strong> Figures are Total-area percentages from NFHS-5 (2019&ndash;2021). High Blood Sugar and Elevated Blood Pressure cover age 15+; Overweight/Obesity covers age 15&ndash;49. Higher reported levels do not mean a state is "unhealthier" &mdash; they may reflect differences in healthcare access, testing rates, or urbanization.
+    <br><br>
+    Full project, methodology, and Power BI dashboard: <a href="https://github.com/amrita-m-portfolio/india-health-awareness-explorer">github.com/amrita-m-portfolio/india-health-awareness-explorer</a>
+  </footer>
+
+</div>
+
+<script>
+const DATA = [{"State_UT": "Andaman & Nicobar Islands", "Glucose_Women_Pct": 17.47, "Glucose_Men_Pct": 17.93, "BP_Women_Pct": 25.29, "BP_Men_Pct": 30.16, "Overweight_Women_Pct": 38.11, "Overweight_Men_Pct": 45.3}, {"State_UT": "Andhra Pradesh", "Glucose_Women_Pct": 19.5, "Glucose_Men_Pct": 21.81, "BP_Women_Pct": 25.26, "BP_Men_Pct": 29.0, "Overweight_Women_Pct": 36.25, "Overweight_Men_Pct": 31.08}, {"State_UT": "Arunachal Pradesh", "Glucose_Women_Pct": 8.39, "Glucose_Men_Pct": 11.87, "BP_Women_Pct": 24.88, "BP_Men_Pct": 33.07, "Overweight_Women_Pct": 23.87, "Overweight_Men_Pct": 27.57}, {"State_UT": "Assam", "Glucose_Women_Pct": 12.8, "Glucose_Men_Pct": 15.98, "BP_Women_Pct": 19.1, "BP_Men_Pct": 20.26, "Overweight_Women_Pct": 15.16, "Overweight_Men_Pct": 16.22}, {"State_UT": "Bihar", "Glucose_Women_Pct": 12.71, "Glucose_Men_Pct": 16.24, "BP_Women_Pct": 15.92, "BP_Men_Pct": 18.36, "Overweight_Women_Pct": 15.93, "Overweight_Men_Pct": 14.66}, {"State_UT": "Chandigarh", "Glucose_Women_Pct": 18.95, "Glucose_Men_Pct": 16.62, "BP_Women_Pct": 25.03, "BP_Men_Pct": 30.62, "Overweight_Women_Pct": 44.02, "Overweight_Men_Pct": 34.44}, {"State_UT": "Chhattisgarh", "Glucose_Women_Pct": 9.01, "Glucose_Men_Pct": 10.83, "BP_Women_Pct": 23.58, "BP_Men_Pct": 27.7, "Overweight_Women_Pct": 14.11, "Overweight_Men_Pct": 14.94}, {"State_UT": "Dadra and Nagar Haveli & Daman and Diu", "Glucose_Women_Pct": 13.6, "Glucose_Men_Pct": 16.39, "BP_Women_Pct": 14.91, "BP_Men_Pct": 15.39, "Overweight_Women_Pct": 26.84, "Overweight_Men_Pct": 21.37}, {"State_UT": "Goa", "Glucose_Women_Pct": 20.82, "Glucose_Men_Pct": 24.13, "BP_Women_Pct": 27.47, "BP_Men_Pct": 26.82, "Overweight_Women_Pct": 36.09, "Overweight_Men_Pct": 32.56}, {"State_UT": "Gujarat", "Glucose_Women_Pct": 15.84, "Glucose_Men_Pct": 16.9, "BP_Women_Pct": 20.55, "BP_Men_Pct": 20.31, "Overweight_Women_Pct": 22.64, "Overweight_Men_Pct": 19.94}, {"State_UT": "Haryana", "Glucose_Women_Pct": 11.93, "Glucose_Men_Pct": 13.46, "BP_Women_Pct": 21.01, "BP_Men_Pct": 25.12, "Overweight_Women_Pct": 33.05, "Overweight_Men_Pct": 28.32}, {"State_UT": "Himachal Pradesh", "Glucose_Women_Pct": 13.88, "Glucose_Men_Pct": 14.72, "BP_Women_Pct": 22.21, "BP_Men_Pct": 24.36, "Overweight_Women_Pct": 30.43, "Overweight_Men_Pct": 30.6}, {"State_UT": "Jammu & Kashmir", "Glucose_Women_Pct": 8.73, "Glucose_Men_Pct": 8.02, "BP_Women_Pct": 19.99, "BP_Men_Pct": 18.94, "Overweight_Women_Pct": 29.33, "Overweight_Men_Pct": 31.63}, {"State_UT": "Jharkhand", "Glucose_Women_Pct": 10.19, "Glucose_Men_Pct": 14.07, "BP_Women_Pct": 17.78, "BP_Men_Pct": 22.6, "Overweight_Women_Pct": 11.85, "Overweight_Men_Pct": 15.12}, {"State_UT": "Karnataka", "Glucose_Women_Pct": 13.95, "Glucose_Men_Pct": 15.55, "BP_Women_Pct": 24.97, "BP_Men_Pct": 26.88, "Overweight_Women_Pct": 30.14, "Overweight_Men_Pct": 30.85}, {"State_UT": "Kerala", "Glucose_Women_Pct": 24.82, "Glucose_Men_Pct": 27.02, "BP_Women_Pct": 30.88, "BP_Men_Pct": 32.76, "Overweight_Women_Pct": 38.12, "Overweight_Men_Pct": 36.35}, {"State_UT": "Ladakh", "Glucose_Women_Pct": 6.69, "Glucose_Men_Pct": 8.27, "BP_Women_Pct": 15.74, "BP_Men_Pct": 17.43, "Overweight_Women_Pct": 28.25, "Overweight_Men_Pct": 37.75}, {"State_UT": "Lakshadweep", "Glucose_Women_Pct": 19.54, "Glucose_Men_Pct": 20.71, "BP_Women_Pct": 24.81, "BP_Men_Pct": 24.74, "Overweight_Women_Pct": 33.52, "Overweight_Men_Pct": 41.27}, {"State_UT": "Madhya Pradesh", "Glucose_Women_Pct": 9.84, "Glucose_Men_Pct": 12.21, "BP_Women_Pct": 20.56, "BP_Men_Pct": 22.65, "Overweight_Women_Pct": 16.58, "Overweight_Men_Pct": 15.57}, {"State_UT": "Maharastra", "Glucose_Women_Pct": 12.37, "Glucose_Men_Pct": 13.63, "BP_Women_Pct": 23.14, "BP_Men_Pct": 24.41, "Overweight_Women_Pct": 23.43, "Overweight_Men_Pct": 24.66}, {"State_UT": "Manipur", "Glucose_Women_Pct": 13.6, "Glucose_Men_Pct": 16.47, "BP_Women_Pct": 23.01, "BP_Men_Pct": 33.19, "Overweight_Women_Pct": 34.06, "Overweight_Men_Pct": 30.25}, {"State_UT": "Meghalaya", "Glucose_Women_Pct": 9.48, "Glucose_Men_Pct": 13.85, "BP_Women_Pct": 18.72, "BP_Men_Pct": 21.41, "Overweight_Women_Pct": 11.48, "Overweight_Men_Pct": 13.87}, {"State_UT": "Mizoram", "Glucose_Women_Pct": 13.8, "Glucose_Men_Pct": 15.44, "BP_Women_Pct": 17.69, "BP_Men_Pct": 25.2, "Overweight_Women_Pct": 24.22, "Overweight_Men_Pct": 31.88}, {"State_UT": "NCT of Delhi", "Glucose_Women_Pct": 12.24, "Glucose_Men_Pct": 14.05, "BP_Women_Pct": 24.13, "BP_Men_Pct": 32.75, "Overweight_Women_Pct": 41.32, "Overweight_Men_Pct": 37.99}, {"State_UT": "Nagaland", "Glucose_Women_Pct": 9.26, "Glucose_Men_Pct": 12.43, "BP_Women_Pct": 22.36, "BP_Men_Pct": 28.7, "Overweight_Women_Pct": 14.44, "Overweight_Men_Pct": 23.92}, {"State_UT": "Odisha", "Glucose_Women_Pct": 13.97, "Glucose_Men_Pct": 17.03, "BP_Women_Pct": 22.37, "BP_Men_Pct": 25.61, "Overweight_Women_Pct": 22.97, "Overweight_Men_Pct": 22.21}, {"State_UT": "Puducherry", "Glucose_Women_Pct": 20.14, "Glucose_Men_Pct": 21.73, "BP_Women_Pct": 22.99, "BP_Men_Pct": 30.11, "Overweight_Women_Pct": 46.2, "Overweight_Men_Pct": 43.29}, {"State_UT": "Punjab", "Glucose_Women_Pct": 14.74, "Glucose_Men_Pct": 14.07, "BP_Women_Pct": 31.19, "BP_Men_Pct": 37.73, "Overweight_Women_Pct": 40.81, "Overweight_Men_Pct": 32.24}, {"State_UT": "Rajasthan", "Glucose_Women_Pct": 7.23, "Glucose_Men_Pct": 8.94, "BP_Women_Pct": 15.35, "BP_Men_Pct": 17.88, "Overweight_Women_Pct": 12.9, "Overweight_Men_Pct": 14.97}, {"State_UT": "Sikkim", "Glucose_Women_Pct": 12.2, "Glucose_Men_Pct": 15.7, "BP_Women_Pct": 34.53, "BP_Men_Pct": 41.58, "Overweight_Women_Pct": 34.71, "Overweight_Men_Pct": 36.32}, {"State_UT": "Tamil Nadu", "Glucose_Women_Pct": 20.65, "Glucose_Men_Pct": 22.06, "BP_Women_Pct": 24.79, "BP_Men_Pct": 30.15, "Overweight_Women_Pct": 40.44, "Overweight_Men_Pct": 37.02}, {"State_UT": "Telangana", "Glucose_Women_Pct": 14.74, "Glucose_Men_Pct": 18.11, "BP_Women_Pct": 26.09, "BP_Men_Pct": 31.39, "Overweight_Women_Pct": 30.09, "Overweight_Men_Pct": 32.33}, {"State_UT": "Tripura", "Glucose_Women_Pct": 17.7, "Glucose_Men_Pct": 19.33, "BP_Women_Pct": 20.87, "BP_Men_Pct": 22.67, "Overweight_Women_Pct": 21.54, "Overweight_Men_Pct": 23.43}, {"State_UT": "Uttar Pradesh", "Glucose_Women_Pct": 9.97, "Glucose_Men_Pct": 11.56, "BP_Women_Pct": 18.35, "BP_Men_Pct": 21.7, "Overweight_Women_Pct": 21.34, "Overweight_Men_Pct": 18.5}, {"State_UT": "Uttarakhand", "Glucose_Women_Pct": 10.84, "Glucose_Men_Pct": 14.25, "BP_Women_Pct": 22.94, "BP_Men_Pct": 31.8, "Overweight_Women_Pct": 29.73, "Overweight_Men_Pct": 27.07}, {"State_UT": "West Bengal", "Glucose_Women_Pct": 17.49, "Glucose_Men_Pct": 21.31, "BP_Women_Pct": 20.46, "BP_Men_Pct": 20.12, "Overweight_Women_Pct": 22.73, "Overweight_Men_Pct": 16.19}];
+
+const INDICATORS = [
+  { key: 'Glucose', label: 'High Blood Sugar', wKey:'Glucose_Women_Pct', mKey:'Glucose_Men_Pct' },
+  { key: 'BP', label: 'Elevated Blood Pressure', wKey:'BP_Women_Pct', mKey:'BP_Men_Pct' },
+  { key: 'Overweight', label: 'Overweight / Obesity', wKey:'Overweight_Women_Pct', mKey:'Overweight_Men_Pct' }
+];
+
+const states = DATA.map(d => d.State_UT).sort();
+const stateSelect = document.getElementById('stateSelect');
+states.forEach(s => {
+  const opt = document.createElement('option');
+  opt.value = s; opt.textContent = s;
+  stateSelect.appendChild(opt);
+});
+stateSelect.value = 'Kerala';
+
+function renderCards(stateName){
+  const row = DATA.find(d => d.State_UT === stateName);
+  const cardsEl = document.getElementById('cards');
+  cardsEl.innerHTML = '';
+  INDICATORS.forEach(ind => {
+    const w = row[ind.wKey], m = row[ind.mKey];
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-label">${ind.label}</div>
+      <div class="card-values">
+        <div class="card-val-group">
+          <div class="who">Women</div>
+          <div class="card-val women">${w!=null? w.toFixed(1):'—'}<span class="pct">%</span></div>
+        </div>
+        <div class="card-val-group">
+          <div class="who">Men</div>
+          <div class="card-val men">${m!=null? m.toFixed(1):'—'}<span class="pct">%</span></div>
+        </div>
+      </div>`;
+    cardsEl.appendChild(card);
+  });
+}
+
+let currentIndicator = INDICATORS[1]; // default BP
+let currentSex = 'women';
+
+const togglesEl = document.getElementById('indicatorToggles');
+function renderToggles(){
+  togglesEl.innerHTML = '';
+  INDICATORS.forEach(ind => {
+    ['women','men'].forEach(sex => {
+      const btn = document.createElement('button');
+      btn.className = 'toggle-btn' + (ind.key===currentIndicator.key && sex===currentSex ? ' active' : '');
+      btn.textContent = `${ind.label} — ${sex === 'women' ? 'Women' : 'Men'}`;
+      btn.onclick = () => { currentIndicator = ind; currentSex = sex; renderToggles(); renderChart(); };
+      togglesEl.appendChild(btn);
+    });
+  });
+}
+
+let chart;
+function renderChart(){
+  const key = currentSex === 'women' ? currentIndicator.wKey : currentIndicator.mKey;
+  const sorted = [...DATA].filter(d => d[key]!=null).sort((a,b) => b[key]-a[key]);
+  const selectedState = stateSelect.value;
+
+  const labels = sorted.map(d => d.State_UT);
+  const values = sorted.map(d => d[key]);
+  const colors = sorted.map(d => d.State_UT === selectedState
+    ? (currentSex==='women' ? '#c8801a' : '#2b4c6f')
+    : '#d8d2c2');
+
+  const ctx = document.getElementById('rankChart').getContext('2d');
+  if (chart) chart.destroy();
+  chart = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ data: values, backgroundColor: colors, borderRadius: 2 }] },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: (c) => `${c.raw.toFixed(1)}%` }
+        }
+      },
+      scales: {
+        x: { title: { display:true, text: `${currentIndicator.label} — ${currentSex==='women'?'Women':'Men'} (%)`, font:{family:"-apple-system,sans-serif", size:12} }, grid:{color:'#eee6d6'} },
+        y: { grid:{display:false}, ticks:{ font:{size:10} } }
+      }
+    }
+  });
+}
+
+stateSelect.addEventListener('change', (e) => {
+  renderCards(e.target.value);
+  renderChart();
+});
+
+renderCards(stateSelect.value);
+renderToggles();
+renderChart();
+</script>
+</body>
+</html>
